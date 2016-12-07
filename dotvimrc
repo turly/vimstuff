@@ -19,7 +19,7 @@ Plugin 'vim-airline/vim-airline'
 set laststatus=2
 
 " Uncomment next line and ":PluginInstall" to get the latest theme
-" I've got a hugely-cut-down version of PaperColor in ~/vimfiles/colors
+" We've a cut-down version of PaperColor in ~/vimfiles/colors/SmallPaperColor
 "Plugin 'nlknguyen/papercolor-theme'  
 "Plugin 'chriskempson/base16-vim'
 "Plugin 'rakr/vim-two-firewatch'
@@ -36,12 +36,11 @@ filetype plugin indent on    " required
 " :PluginSearch foo - searches for foo; append `!` to refresh local cache
 " :PluginClean      - confirms removal of unused plugins; append `!` to auto-approve removal
 
-set encoding=utf-8              " Needed for patched powerline fonts (internal to vim I think)
+set encoding=utf-8    " Needed for patched powerline fonts (internal to vim I think)
 let mapleader = ","
 set background=dark
 if has("gui_running")
     set guioptions-=T           " no clunky toolbar (bozo icons)
-    "colorscheme summerfruit256
     set guifont=Anonymice_Powerline:h11
     set lines=42
     set columns=100
@@ -52,18 +51,15 @@ else
     set ttyfast                 "tf:    improves redrawing for newer computers
     set t_Co=256                " This is may or may not needed.
     "set mouse=a                " Enabling this allows mouse-clicks BUT NOT PASTING
-    "colorscheme morning
     let &runtimepath.=',~/vimfiles'     " get .../colors and .../after here
 endif
 
-"colorscheme PaperColor          " Actually my cut-down variant of PaperColor
-"colorscheme solarized
-"colorscheme two-firewatch
+"colorscheme SmallPaperColor    " my cut-down variant of PaperColor
 colorscheme bluish
 
 let g:airline#extensions#whitespace#enabled=0
 let g:airline#extensions#whitespace#checks=[]
-let g:airline_powerline_fonts=1 " We're using patched Anonymice font in both gui and terminal
+let g:airline_powerline_fonts=1 " We use patched Anonymice font in both gui and terminal
 let g:airline_theme='papercolor'
 
 " Prefer LF line endings
@@ -107,7 +103,7 @@ set expandtab
 set backspace=indent,eol,start
 "set hlsearch
 set notimeout
-" Turn off paste for a middle mouse button click (scroll wheel accidentally pasting stuff!)
+" Turn off paste for middle mouse button click (scroll wheel accidentally pasting stuff!)
 map <MiddleMouse> <Nop>
 imap <MiddleMouse> <Nop>
 
@@ -134,12 +130,6 @@ if isdirectory ($DOS_CSP)
     else
         set tags=$DOS_CSP/phnx_tags,tags
     endif
-    "cscope
-    "set csprg=Y:/bin/cygwin/cscope.exe
-    "set shell=cmd
-    "set shellslash " use forward-slash for filenames
-    "cscope add $DOS_CSP
-    "map <F5> :cscope add $DOS_CSP
 endif
 
 " F5 - Tag identifier under cursor.
@@ -158,11 +148,9 @@ autocmd BufReadPost *
 "highlight shell scripts as per POSIX, not original Bourne shell
 let g:is_posix = 1
 
-"Note <leader> is the user modifier key (like g is the vim modifier key)
-"One can change it from the default of \ using: let mapleader = ","
-"\n to turn off search highlighting
+" ,n to turn off search highlighting
 nmap <silent> <leader>n :silent :nohlsearch<CR>
-"\l to toggle visible whitespace
+" ,l to toggle visible whitespace
 nmap <silent> <leader>l :set list!<CR>
 "Shift-tab to insert a hard tab
 imap <silent> <S-tab> <C-v><tab>
@@ -187,6 +175,4 @@ command! WQ wq
 command! Wq wq
 command! W w
 command! Q q
-
-"call foreground() -- doesn't seem to work on Windows
 
