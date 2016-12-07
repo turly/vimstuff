@@ -9,7 +9,7 @@ hi clear
 if exists("syntax_on")
   syntax reset
 endif
-let g:colors_name = "turly"
+let g:colors_name = "bluish"
 hi Normal		guifg=yellow1 guibg=#102048	ctermfg=226 ctermbg=235
 hi CursorLine	guibg=#282850
 
