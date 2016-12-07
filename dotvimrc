@@ -1,0 +1,192 @@
+"turly's minimal-ish vimrc
+
+set nocompatible
+
+" See https://github.com/VundleVim/Vundle.vim
+set rtp+=~/.vim/bundle/Vundle.vim
+call vundle#begin()
+Plugin 'VundleVim/Vundle.vim' " let Vundle manage Vundle, required
+
+Plugin 'Tagbar'
+nmap <F8> :TagbarToggle<CR>
+
+Plugin 'ccase.vim'  " Clearcase
+
+Plugin 'vim-airline/vim-airline'
+" turly copied papercolor.vim from vim-airline-themes to
+" /home/turly/.vim/bundle/vim-airline/autoload/airline/themes
+"Plugin 'vim-airline/vim-airline-themes'
+set laststatus=2
+
+" Uncomment next line and ":PluginInstall" to get the latest theme
+" I've got a hugely-cut-down version of PaperColor in ~/vimfiles/colors
+"Plugin 'nlknguyen/papercolor-theme'  
+"Plugin 'chriskempson/base16-vim'
+"Plugin 'rakr/vim-two-firewatch'
+"Plugin 'altercation/vim-colors-solarized'
+"Plugin 'chriskempson/vim-tomorrow-theme'
+"Plugin 'w0ng/vim-hybrid'
+
+" All of your Plugins must be added before the following line
+call vundle#end()            " required
+filetype plugin indent on    " required
+" Brief help
+" :PluginList       - lists configured plugins
+" :PluginInstall    - installs plugins; append `!` to update or just :PluginUpdate
+" :PluginSearch foo - searches for foo; append `!` to refresh local cache
+" :PluginClean      - confirms removal of unused plugins; append `!` to auto-approve removal
+
+set encoding=utf-8              " Needed for patched powerline fonts (internal to vim I think)
+let mapleader = ","
+set background=dark
+if has("gui_running")
+    set guioptions-=T           " no clunky toolbar (bozo icons)
+    "colorscheme summerfruit256
+    set guifont=Anonymice_Powerline:h11
+    set lines=42
+    set columns=100
+    "set number
+    "set ruler
+    set cursorline
+else
+    set ttyfast                 "tf:    improves redrawing for newer computers
+    set t_Co=256                " This is may or may not needed.
+    "set mouse=a                " Enabling this allows mouse-clicks BUT NOT PASTING
+    "colorscheme morning
+    let &runtimepath.=',~/vimfiles'     " get .../colors and .../after here
+endif
+
+"colorscheme PaperColor          " Actually my cut-down variant of PaperColor
+"colorscheme solarized
+"colorscheme two-firewatch
+colorscheme bluish
+
+let g:airline#extensions#whitespace#enabled=0
+let g:airline#extensions#whitespace#checks=[]
+let g:airline_powerline_fonts=1 " We're using patched Anonymice font in both gui and terminal
+let g:airline_theme='papercolor'
+
+" Prefer LF line endings
+set fileformat=unix
+set fileformats=unix,dos
+
+let c_gnu=1
+let c_ansi_typedefs=1
+let c_comment_strings=1
+
+syntax on
+"We don't want the syntax menu, just say we've already installed it.
+"let did_install_syntax_menu=1  " doesn't seem to work on vim8.0
+
+" These need to appear AFTER syntax has been enabled
+hi PreProc gui=italic
+hi Comment gui=italic 
+
+set switchbuf=useopen       "swb:   Jumps to first window that contains
+                            "specified buffer instead of duplicating an open window
+
+"Usually I don't care about case when searching
+set ignorecase
+"Only ignore case when we type lower case when searching
+set smartcase
+"Silent bell
+set visualbell
+set hidden  " allow background buffers to be in a modified state (when tag jumping etc.)
+"Show menu with possible tab completions
+set wildmenu
+"Ignore these files when completing names and in Explorer
+set wildignore=.svn,CVS,.git,*.o,*.a,*.class,*.mo,*.la,*.so,*.obj,*.swp,*.jpg,*.png,*.xpm,*.gif
+set wildmode=list:longest    "filename completion
+
+set tabstop=4
+set shiftwidth=4
+
+set autoindent
+set showcmd
+set expandtab
+set backspace=indent,eol,start
+"set hlsearch
+set notimeout
+" Turn off paste for a middle mouse button click (scroll wheel accidentally pasting stuff!)
+map <MiddleMouse> <Nop>
+imap <MiddleMouse> <Nop>
+
+" Min lines to keep above or below the cursor
+set scrolloff=2
+
+set showmatch
+"set noswapfile
+if isdirectory ("C:/Temp")
+    set backupdir=C:/Temp
+    set directory=C:/Temp
+endif
+
+if filereadable ("c:/cygwin-1.7.31-3/bin/ctags.exe")
+    let g:tagbar_ctags_bin= 'c:/cygwin-1.7.31-3/bin/ctags'
+elseif filereadable ("c:/cygwin/bin/ctags.exe")
+    let g:tagbar_ctags_bin= 'c:/cygwin/bin/ctags'
+endif
+
+set tags=tags
+if isdirectory ($DOS_CSP)
+    if filereadable (expand ("$DOS_CSP/phnx_tags_dos"))
+        set tags=$DOS_CSP/phnx_tags_dos
+    else
+        set tags=$DOS_CSP/phnx_tags,tags
+    endif
+    "cscope
+    "set csprg=Y:/bin/cygwin/cscope.exe
+    "set shell=cmd
+    "set shellslash " use forward-slash for filenames
+    "cscope add $DOS_CSP
+    "map <F5> :cscope add $DOS_CSP
+endif
+
+" F5 - Tag identifier under cursor.
+nmap <F5> :tag <C-r><C-w><CR>
+" same in insert mode - warning, will take you into Normal mode.
+map! <F5> <Esc>:tag <C-r><C-w><CR>
+
+" When editing a file, always jump to the last known cursor position.
+" Don't do it when the position is invalid or when inside an event handler
+" (happens when dropping a file on gvim).
+autocmd BufReadPost *
+    \ if line("'\"") > 0 && line("'\"") <= line("$") |
+    \   exe "normal g`\"" |
+    \ endif
+
+"highlight shell scripts as per POSIX, not original Bourne shell
+let g:is_posix = 1
+
+"Note <leader> is the user modifier key (like g is the vim modifier key)
+"One can change it from the default of \ using: let mapleader = ","
+"\n to turn off search highlighting
+nmap <silent> <leader>n :silent :nohlsearch<CR>
+"\l to toggle visible whitespace
+nmap <silent> <leader>l :set list!<CR>
+"Shift-tab to insert a hard tab
+imap <silent> <S-tab> <C-v><tab>
+
+set nofoldenable
+
+" Make shift-insert work like in Xterm
+map <S-Insert> <MiddleMouse>
+map! <S-Insert> <MiddleMouse>
+
+" Hide the mouse pointer while typing
+set mousehide
+
+nnoremap ,cd :cd %:p:h<CR>:pwd<CR>  " ,cd to chdir to current file (prints dir afterwards)
+
+if exists('+shellslash')
+    set shellslash      " Get Windows vim to use forward slashes instead of backslashes
+endif
+
+" I keep on pressing capital-W / capital-Q
+command! WQ wq
+command! Wq wq
+command! W w
+command! Q q
+
+"call foreground() -- doesn't seem to work on Windows
+
