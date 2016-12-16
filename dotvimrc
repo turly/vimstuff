@@ -1,5 +1,6 @@
 "turly's minimal-ish vimrc
-
+"Cobbled together from various sources since 2001 !
+"
 set nocompatible
 
 " See https://github.com/VundleVim/Vundle.vim
@@ -9,8 +10,6 @@ Plugin 'VundleVim/Vundle.vim' " let Vundle manage Vundle, required
 
 Plugin 'Tagbar'
 nmap <F8> :TagbarToggle<CR>
-
-Plugin 'ccase.vim'  " Clearcase
 
 Plugin 'vim-airline/vim-airline'
 " turly copied papercolor.vim from vim-airline-themes to
@@ -133,9 +132,13 @@ if isdirectory ($DOS_CSP)
 endif
 
 " F5 - Tag identifier under cursor.
-nmap <F5> :tag <C-r><C-w><CR>
+nmap <F5> :tjump <C-r><C-w><CR>
 " same in insert mode - warning, will take you into Normal mode.
-map! <F5> <Esc>:tag <C-r><C-w><CR>
+map! <F5> <Esc>:tjump <C-r><C-w><CR>
+"Ctrl+\ - Open the definition in a new tab
+map <C-\> :tab split<CR>:exec("tag ".expand("<cword>"))<CR>
+"Alt+] - Open the definition in a vertical split
+"map <A-]> :vsp <CR>:exec("tag ".expand("<cword>"))<CR>
 
 " When editing a file, always jump to the last known cursor position.
 " Don't do it when the position is invalid or when inside an event handler
@@ -152,6 +155,8 @@ let g:is_posix = 1
 nmap <silent> <leader>n :silent :nohlsearch<CR>
 " ,l to toggle visible whitespace
 nmap <silent> <leader>l :set list!<CR>
+" ,n to toggle line numbers
+nmap <silent> <leader>n :set number!<CR>
 "Shift-tab to insert a hard tab
 imap <silent> <S-tab> <C-v><tab>
 
@@ -167,8 +172,26 @@ set mousehide
 nnoremap ,cd :cd %:p:h<CR>:pwd<CR>  " ,cd to chdir to current file (prints dir afterwards)
 
 if exists('+shellslash')
-    set shellslash      " Get Windows vim to use forward slashes instead of backslashes
-endif
+    set shellslash      " Get Windows Vim to use forward slashes instead of backslashes
+    function! DosExpandCurrentFile()
+        return substitute(expand("%:p"), "/", "\\", "g")
+    endfun
+    command! Ctcou echom system ("cleartool co -unr -nmaster -nc " . DosExpandCurrentFile())
+    command! Cvtree echom system ("clearvtree " . DosExpandCurrentFile())
+
+    function! FixupCs()
+      " Fixup Configspec - change
+      "     Checked in "/dir/file" version "\main\47".
+      " -> 
+      "     element /dir/file    /main/47
+      execute '%s/^Checked in "/element /g'
+      execute '%s/" version "/    /g'
+      execute '%s/\\/\//g'
+      execute '%s/".//g'
+    endfunction
+    command! Fixcs call FixupCs()
+
+endif   " shellslash
 
 " I keep on pressing capital-W / capital-Q
 command! WQ wq
