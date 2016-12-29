@@ -40,7 +40,8 @@ let mapleader = ","
 set background=dark
 if has("gui_running")
     set guioptions-=T           " no clunky toolbar (bozo icons)
-    set guifont=Anonymice_Powerline:h11
+    " This will stop at the first fontname that exists.
+    set guifont=Anonymous\ Pro\ for\ Powerline\ 11,Anonymice_Powerline:h11
     set lines=42
     set columns=100
     "set number
