@@ -11,6 +11,11 @@ Plugin 'VundleVim/Vundle.vim' " let Vundle manage Vundle, required
 Plugin 'Tagbar'
 nmap <F8> :TagbarToggle<CR>
 
+Plugin 'ajh17/VimCompletesMe'
+let g:vcm_default_maps = 0      " Tab means tab!
+imap <S-Tab> <Plug>vim_completes_me_backward
+set completeopt+=longest
+
 Plugin 'vim-airline/vim-airline'
 " turly copied papercolor.vim from vim-airline-themes to
 " /home/turly/.vim/bundle/vim-airline/autoload/airline/themes
@@ -40,6 +45,7 @@ let mapleader = ","
 set background=dark
 if has("gui_running")
     set guioptions-=T           " no clunky toolbar (bozo icons)
+    set guioptions+=c           " no Windows dialogs
     " This will stop at the first fontname that exists.
     set guifont=Anonymous\ Pro\ for\ Powerline\ 11,Anonymice_Powerline:h11
     set lines=42
@@ -88,6 +94,7 @@ set smartcase
 "Silent bell
 set visualbell
 set hidden  " allow background buffers to be in a modified state (when tag jumping etc.)
+set confirm " comfirm before deleting buffer with unsaved changes
 "Show menu with possible tab completions
 set wildmenu
 "Ignore these files when completing names and in Explorer
@@ -159,8 +166,13 @@ nmap <silent> <leader>l :set list!<CR>
 " ,n to toggle line numbers
 nmap <silent> <leader>n :set number!<CR>
 "Shift-tab to insert a hard tab
-imap <silent> <S-tab> <C-v><tab>
+"imap <silent> <S-tab> <C-v><tab>
 
+" When a popup menu is visible, make ENTER select the item instead of
+" inserting a newline
+inoremap <expr> <CR> pumvisible() ? "\<C-y>" : "\<C-g>u\<CR>"
+
+" I'm old-school and have never gotten used to this folding lark
 set nofoldenable
 
 " Make shift-insert work like in Xterm
@@ -174,13 +186,21 @@ nnoremap ,cd :cd %:p:h<CR>:pwd<CR>  " ,cd to chdir to current file (prints dir a
 
 if exists('+shellslash')
     set shellslash      " Get Windows Vim to use forward slashes instead of backslashes
-    function! DosExpandCurrentFile()
+    function! DosExpandCurrentFile()        " Full DOS pathname of current file
         return substitute(expand("%:p"), "/", "\\", "g")
     endfun
     command! Ctcou echom system ("cleartool co -unr -nmaster -nc " . DosExpandCurrentFile())
     command! Cvtree echom system ("clearvtree " . DosExpandCurrentFile())
 
-    function! FixupCs()
+    function! CleartoolUnCo()               " Cleartool UnCheckout
+        let choice = confirm ("Uncheckout " . expand ("%.p") . " ?", "&Yes\n&No", 2)
+        if choice == 1
+            echom system ("cleartool unco -keep " . DosExpandCurrentFile())
+        endif
+    endfunction
+    command! Ctunco call CleartoolUnCo()
+
+    function! FixupCs()                     " Fixup configspec
       " Fixup Configspec - change
       "     Checked in "/dir/file" version "\main\47".
       " -> 
