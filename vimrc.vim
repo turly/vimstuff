@@ -11,25 +11,9 @@ Plugin 'VundleVim/Vundle.vim' " let Vundle manage Vundle, required
 Plugin 'Tagbar'
 nmap <F8> :TagbarToggle<CR>
 
-Plugin 'ajh17/VimCompletesMe'
-let g:vcm_default_maps = 0      " Tab means tab!
-imap <S-Tab> <Plug>vim_completes_me_backward
 set completeopt+=longest
 
-Plugin 'vim-airline/vim-airline'
-" turly copied papercolor.vim from vim-airline-themes to
-" /home/turly/.vim/bundle/vim-airline/autoload/airline/themes
-"Plugin 'vim-airline/vim-airline-themes'
-set laststatus=2
-
-" Uncomment next line and ":PluginInstall" to get the latest theme
-" We've a cut-down version of PaperColor in ~/vimfiles/colors/SmallPaperColor
-"Plugin 'nlknguyen/papercolor-theme'  
-"Plugin 'chriskempson/base16-vim'
-"Plugin 'rakr/vim-two-firewatch'
-"Plugin 'altercation/vim-colors-solarized'
-"Plugin 'chriskempson/vim-tomorrow-theme'
-"Plugin 'w0ng/vim-hybrid'
+Plugin 'itchyny/lightline.vim'
 
 " All of your Plugins must be added before the following line
 call vundle#end()            " required
@@ -60,13 +44,16 @@ else
     let &runtimepath.=',~/vimfiles'     " get .../colors and .../after here
 endif
 
-"colorscheme SmallPaperColor    " my cut-down variant of PaperColor
 colorscheme bluish
 
-let g:airline#extensions#whitespace#enabled=0
-let g:airline#extensions#whitespace#checks=[]
-let g:airline_powerline_fonts=1 " We use patched Anonymice font in both gui and terminal
-let g:airline_theme='papercolor'
+set laststatus=2
+let g:lightline = {
+      \ 'component': {
+      \   'readonly': '%{&readonly?"\ue0a2":""}',
+      \ },
+      \ 'separator': { 'left': "\ue0b0", 'right': "\ue0b2" },
+      \ 'subseparator': { 'left': "\ue0b1", 'right': "\ue0b3" }
+      \ }
 
 " Prefer LF line endings
 set fileformat=unix
