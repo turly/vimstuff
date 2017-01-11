@@ -10,7 +10,7 @@ if exists("syntax_on")
   syntax reset
 endif
 let g:colors_name = "bluish"
-hi Normal		guifg=yellow1 guibg=#102048	ctermfg=226 ctermbg=234
+hi Normal		guifg=yellow1 guibg=#101848	ctermfg=226 ctermbg=234
 hi CursorLine	guibg=#282850
 hi LineNr       guifg=gray91  guibg=#303060 ctermfg=250 ctermbg=235
 hi Comment		guifg=cyan3			ctermfg=43
@@ -28,6 +28,8 @@ hi cCppOutIf	guifg=cyan2			ctermfg=50
 hi cBoolean		guifg=gray91		ctermfg=254
 hi cOperator	guifg=gray93		ctermfg=254
 hi Structure	guifg=gray93		ctermfg=254
+
+hi Visual       guifg=#262626       guibg=#ffffff  ctermfg=235  ctermbg=15
 
 hi Preproc			guifg=LightGoldenRod	ctermfg=227
 hi cUserFunction	guifg=yellow			ctermfg=226
