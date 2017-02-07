@@ -11,8 +11,6 @@ Plugin 'VundleVim/Vundle.vim' " let Vundle manage Vundle, required
 Plugin 'Tagbar'
 nmap <F8> :TagbarToggle<CR>
 
-set completeopt+=longest
-
 Plugin 'itchyny/lightline.vim'
 
 " All of your Plugins must be added before the following line
@@ -62,6 +60,7 @@ set fileformats=unix,dos
 let c_gnu=1
 let c_ansi_typedefs=1
 let c_comment_strings=1
+let c_no_if0_fold=1     " bug? in syntax/c.vim causes problems if '#endif' for '#if 0' is not on column zero 
 
 syntax on
 "We don't want the syntax menu, just say we've already installed it.
@@ -74,9 +73,8 @@ hi Comment gui=italic
 set switchbuf=useopen       "swb:   Jumps to first window that contains
                             "specified buffer instead of duplicating an open window
 
-"Usually I don't care about case when searching
-set ignorecase
 "Only ignore case when we type lower case when searching
+set ignorecase
 set smartcase
 "Silent bell
 set visualbell
@@ -88,6 +86,9 @@ set wildmenu
 set wildignore=.svn,CVS,.git,*.o,*.a,*.class,*.mo,*.la,*.so,*.obj,*.swp,*.jpg,*.png,*.xpm,*.gif
 set wildmode=list:longest    "filename completion
 
+" Ctrl-P/Ctrl-N ins-completion options - current buffer, current window,
+" loaded buffer, unloaded buffers - add 't' for tags, but NOT included file
+set complete=.,w,b,u,t
 set tabstop=4
 set shiftwidth=4
 
@@ -122,7 +123,7 @@ if isdirectory ($DOS_CSP)
     if filereadable (expand ("$DOS_CSP/phnx_tags_dos"))
         set tags=$DOS_CSP/phnx_tags_dos
     else
-        set tags=$DOS_CSP/phnx_tags,tags
+        set tags=$DOS_CSP/phnx_tags
     endif
 endif
 
@@ -143,6 +144,12 @@ autocmd BufReadPost *
     \   exe "normal g`\"" |
     \ endif
 
+" Ctrl-Enter - tag in new tab 
+"nmap <C-Enter> <C-w><C-]><C-w>T
+
+" opens each buffer in its own tab page
+"autocmd BufAdd,BufNewFile * nested tab sball
+
 "highlight shell scripts as per POSIX, not original Bourne shell
 let g:is_posix = 1
 
@@ -154,6 +161,12 @@ nmap <silent> <leader>l :set list!<CR>
 nmap <silent> <leader>n :set number!<CR>
 "Shift-tab to insert a hard tab
 "imap <silent> <S-tab> <C-v><tab>
+
+" ,f to insert a new line with '#ifdef OCTEON_TARGET'
+nmap <silent> <leader>fo o#ifdef OCTEON_TARGET
+nmap <silent> <leader>eo o#endif /* OCTEON_TARGET  */
+nmap <silent> <leader>fl o#ifdef __LINUX__
+nmap <silent> <leader>el o#endif /* __LINUX__  */
 
 " When a popup menu is visible, make ENTER select the item instead of
 " inserting a newline

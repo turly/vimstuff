@@ -11,6 +11,7 @@ if exists("syntax_on")
 endif
 let g:colors_name = "bluish"
 hi Normal		guifg=yellow1 guibg=#101848	ctermfg=226 ctermbg=234
+hi Todo         guifg=yellow1 guibg=#101888	ctermfg=226 ctermbg=234
 hi CursorLine	guibg=#282850
 hi LineNr       guifg=gray91  guibg=#303060 ctermfg=250 ctermbg=235
 hi Comment		guifg=cyan3			ctermfg=43
