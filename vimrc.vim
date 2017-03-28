@@ -118,14 +118,25 @@ elseif filereadable ("c:/cygwin/bin/ctags.exe")
     let g:tagbar_ctags_bin= 'c:/cygwin/bin/ctags'
 endif
 
+" When running ctags, add --extra=+f to get filenames.  V. handy for large
+" projects - can then just say :tj foo.c  - et voila.  See also "gf" (below.)
 set tags=tags
 if isdirectory ($DOS_CSP)
-    if filereadable (expand ("$DOS_CSP/phnx_tags_dos"))
-        set tags=$DOS_CSP/phnx_tags_dos
-    else
-        set tags=$DOS_CSP/phnx_tags
-    endif
+    set tags=$DOS_CSP/phnx_tags
+
+    "Cygwin cscope + Windows gVim doesn't want to co-operate for some reason, works fine standalone
+    "Tried using Ausun Wang's cswrapper from http://www.vim.org/scripts/script.php?script_id=1783
+    "function! AddCscope()
+    "    set csprg=y:/bin/cygwin/cswrapper.exe
+    "    cscope add $DOS_CSP/cscope.out
+    "endfun
+    "command! Addcs call AddCscope()     " Invoke only when needed, my cscope.out is 350 MB!
+
 endif
+
+" gf - go to file under cursor - if filename is in taglist, use tags.
+" http://vim.1045645.n5.nabble.com/cscope-best-practices-td5717670.html
+nnoremap <expr> gf empty(taglist('^'.expand('<cfile>').'$')) ? "gf" : ":tj <C-R><C-F><CR>" 
 
 " F5 - Tag identifier under cursor.
 nmap <F5> :tjump <C-r><C-w><CR>
@@ -164,9 +175,9 @@ nmap <silent> <leader>n :set number!<CR>
 
 " ,f to insert a new line with '#ifdef OCTEON_TARGET'
 nmap <silent> <leader>fo o#ifdef OCTEON_TARGET
-nmap <silent> <leader>eo o#endif /* OCTEON_TARGET  */
+nmap <silent> <leader>eo o#endif	/* OCTEON_TARGET  */
 nmap <silent> <leader>fl o#ifdef __LINUX__
-nmap <silent> <leader>el o#endif /* __LINUX__  */
+nmap <silent> <leader>el o#endif	/* __LINUX__  */
 
 " When a popup menu is visible, make ENTER select the item instead of
 " inserting a newline
@@ -219,4 +230,6 @@ command! WQ wq
 command! Wq wq
 command! W w
 command! Q q
+
+map Q nop   " Disable "Entering Ex mode" cruft
 
