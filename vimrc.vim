@@ -60,7 +60,7 @@ set fileformats=unix,dos
 let c_gnu=1
 let c_ansi_typedefs=1
 let c_comment_strings=1
-let c_no_if0_fold=1     " bug? in syntax/c.vim causes problems if '#endif' for '#if 0' is not on column zero 
+let c_no_if0_fold=1     " bug? in syntax/c.vim causes problems if '#endif' for '#if 0' is not on column zero
 
 syntax on
 "We don't want the syntax menu, just say we've already installed it.
@@ -68,7 +68,7 @@ syntax on
 
 " These need to appear AFTER syntax has been enabled
 hi PreProc gui=italic
-hi Comment gui=italic 
+hi Comment gui=italic
 
 set switchbuf=useopen       "swb:   Jumps to first window that contains
                             "specified buffer instead of duplicating an open window
@@ -136,7 +136,7 @@ endif
 
 " gf - go to file under cursor - if filename is in taglist, use tags.
 " http://vim.1045645.n5.nabble.com/cscope-best-practices-td5717670.html
-nnoremap <expr> gf empty(taglist('^'.expand('<cfile>').'$')) ? "gf" : ":tj <C-R><C-F><CR>" 
+nnoremap <expr> gf empty(taglist('^'.expand('<cfile>').'$')) ? "gf" : ":tj <C-R><C-F><CR>"
 
 " F5 - Tag identifier under cursor.
 nmap <F5> :tjump <C-r><C-w><CR>
@@ -155,7 +155,7 @@ autocmd BufReadPost *
     \   exe "normal g`\"" |
     \ endif
 
-" Ctrl-Enter - tag in new tab 
+" Ctrl-Enter - tag in new tab
 "nmap <C-Enter> <C-w><C-]><C-w>T
 
 " opens each buffer in its own tab page
@@ -214,7 +214,7 @@ if exists('+shellslash')
     function! FixupCs()                     " Fixup configspec
       " Fixup Configspec - change
       "     Checked in "/dir/file" version "\main\47".
-      " -> 
+      " ->
       "     element /dir/file    /main/47
       execute '%s/^Checked in "/element /g'
       execute '%s/" version "/    /g'
@@ -224,6 +224,8 @@ if exists('+shellslash')
     command! Fixcs call FixupCs()
 
 endif   " shellslash
+
+command! Trimws execute '%s/\s*$//g'   " trim trailing whitespace
 
 " I keep on pressing capital-W / capital-Q
 command! WQ wq
