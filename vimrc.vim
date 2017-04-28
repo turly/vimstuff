@@ -40,6 +40,9 @@ else
     set t_Co=256                " This is may or may not needed.
     "set mouse=a                " Enabling this allows mouse-clicks BUT NOT PASTING
     let &runtimepath.=',~/vimfiles'     " get .../colors and .../after here
+    if (has("termguicolors"))           " 24-bit xterm colors
+        set termguicolors
+    endif
 endif
 
 colorscheme bluish
@@ -91,6 +94,7 @@ set wildmode=list:longest    "filename completion
 set complete=.,w,b,u,t
 set tabstop=4
 set shiftwidth=4
+set nrformats-=octal
 
 set autoindent
 set showcmd
