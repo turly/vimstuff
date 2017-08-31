@@ -4,12 +4,15 @@
 set nocompatible
 
 " See https://github.com/VundleVim/Vundle.vim
+" To update: vim -c VundleUpdate -c quitall
 set rtp+=~/.vim/bundle/Vundle.vim
 call vundle#begin()
 Plugin 'VundleVim/Vundle.vim' " let Vundle manage Vundle, required
 
 Plugin 'Tagbar'
 nmap <F8> :TagbarToggle<CR>
+
+"Plugin 'ipod825/TagJump'
 
 Plugin 'itchyny/lightline.vim'
 
@@ -43,6 +46,11 @@ else
     if (has("termguicolors"))           " 24-bit xterm colors
         set termguicolors
     endif
+    if &term == "xterm" || &term == "xterm-256color"
+        " Set terminal title to be filename - full pat  [user@host]
+        autocmd BufEnter * let &titlestring = ' ' . expand("%:t") . '  -  ' . expand("%:p") . '   [' . $USER . '@' . hostname() . ']'
+        set title
+    endif
 endif
 
 colorscheme bluish
@@ -51,6 +59,10 @@ set laststatus=2
 let g:lightline = {
       \ 'component': {
       \   'readonly': '%{&readonly?"\ue0a2":""}',
+      \   'tagbar': '%{tagbar#currenttag("[%s]", "", "f")}',
+      \ },
+      \ 'active': {
+      \   'left': [ [ 'mode', 'paste' ], [ 'readonly', 'filename'], ['modified', 'tagbar'] ],
       \ },
       \ 'separator': { 'left': "\ue0b0", 'right': "\ue0b2" },
       \ 'subseparator': { 'left': "\ue0b1", 'right': "\ue0b3" }
@@ -142,12 +154,12 @@ endif
 " http://vim.1045645.n5.nabble.com/cscope-best-practices-td5717670.html
 nnoremap <expr> gf empty(taglist('^'.expand('<cfile>').'$')) ? "gf" : ":tj <C-R><C-F><CR>"
 
-" F5 - Tag identifier under cursor.
+" F5 - TagJump identifier under cursor.
 nmap <F5> :tjump <C-r><C-w><CR>
 " same in insert mode - warning, will take you into Normal mode.
 map! <F5> <Esc>:tjump <C-r><C-w><CR>
 "Ctrl+\ - Open the definition in a new tab
-map <C-\> :tab split<CR>:exec("tag ".expand("<cword>"))<CR>
+"map <C-\> :tab split<CR>:exec("tag ".expand("<cword>"))<CR>
 "Alt+] - Open the definition in a vertical split
 "map <A-]> :vsp <CR>:exec("tag ".expand("<cword>"))<CR>
 
@@ -177,18 +189,28 @@ nmap <silent> <leader>n :set number!<CR>
 "Shift-tab to insert a hard tab
 "imap <silent> <S-tab> <C-v><tab>
 
-" ,f to insert a new line with '#ifdef OCTEON_TARGET'
+" ,fo to insert a new line with '#ifdef OCTEON_TARGET'
 nmap <silent> <leader>fo o#ifdef OCTEON_TARGET
 nmap <silent> <leader>eo o#endif	/* OCTEON_TARGET  */
 nmap <silent> <leader>fl o#ifdef __LINUX__
 nmap <silent> <leader>el o#endif	/* __LINUX__  */
+nmap <silent> <leader>fa o#ifdef __ARM__
+nmap <silent> <leader>ea o#endif	/* __ARM__  */
+nmap <silent> <leader>ef o#endif
+nmap <silent> <leader>ee o#else
 
 " When a popup menu is visible, make ENTER select the item instead of
 " inserting a newline
 inoremap <expr> <CR> pumvisible() ? "\<C-y>" : "\<C-g>u\<CR>"
 
-" I'm old-school and have never gotten used to this folding lark
+" Only interested in manual folding
 set nofoldenable
+" F2 - Toggle fold at #if to the matching #else or #endif.  Use zo / zc to open/close fold
+"      ...and to avoid searching inside folds, use:  set fdo-=search
+nnoremap <F2> V%zf
+" Space toggles fold if there's one there
+nnoremap <silent> <Space> @=(foldlevel('.')?'za':"\<Space>")<CR>
+
 
 " Make shift-insert work like in Xterm
 map <S-Insert> <MiddleMouse>
@@ -198,13 +220,27 @@ map! <S-Insert> <MiddleMouse>
 set mousehide
 
 nnoremap ,cd :cd %:p:h<CR>:pwd<CR>  " ,cd to chdir to current file (prints dir afterwards)
+if exists('+shellslash')            " DOS
+    set shellslash                  " Get Windows Vim to use forward slashes instead of backslashes
+endif
 
-if exists('+shellslash')
-    set shellslash      " Get Windows Vim to use forward slashes instead of backslashes
+if 1                                        " Clearcase
     function! DosExpandCurrentFile()        " Full DOS pathname of current file
-        return substitute(expand("%:p"), "/", "\\", "g")
+        if exists('+shellslash')            " DOS
+            return substitute(expand("%:p"), "/", "\\", "g")
+        else
+            return expand("%:p")
+        endif
     endfun
-    command! Ctcou echom system ("cleartool co -unr -nmaster -nc " . DosExpandCurrentFile())
+    function! CleartoolCheckout()
+        echom system ("cleartool co -unr -nmaster -nc " . DosExpandCurrentFile())
+        if &modified == 1
+            echoerr "ERROR: Not auto-loading file as buffer has been modified"
+        else
+            exe 'e!'
+        endif
+    endfun
+    command! Ctcou call CleartoolCheckout()
     command! Cvtree echom system ("clearvtree " . DosExpandCurrentFile())
 
     function! CleartoolUnCo()               " Cleartool UnCheckout
@@ -227,7 +263,7 @@ if exists('+shellslash')
     endfunction
     command! Fixcs call FixupCs()
 
-endif   " shellslash
+endif                                       " Clearcase 
 
 command! Trimws execute '%s/\s*$//g'   " trim trailing whitespace
 
@@ -238,4 +274,7 @@ command! W w
 command! Q q
 
 map Q nop   " Disable "Entering Ex mode" cruft
+
+" Tab name is filename only with modification '+' if appropriate
+set guitablabel=%t\ %M
 
