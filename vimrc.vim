@@ -71,6 +71,7 @@ let g:lightline = {
 " Prefer LF line endings
 set fileformat=unix
 set fileformats=unix,dos
+set pastetoggle=<F3>    " Turns off autoindent, etc when pasting code into vim
 
 let c_gnu=1
 let c_ansi_typedefs=1
