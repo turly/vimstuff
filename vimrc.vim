@@ -41,7 +41,7 @@ if has("gui_running")
 else
     set ttyfast                 "tf:    improves redrawing for newer computers
     set t_Co=256                " This is may or may not needed.
-    "set mouse=a                " Enabling this allows mouse-clicks BUT NOT PASTING
+    set mouse=a                 " Enabling this allows mouse-clicks (COPY/PASTE with SHIFT-[right-]clicks)
     let &runtimepath.=',~/vimfiles'     " get .../colors and .../after here
     if (has("termguicolors"))           " 24-bit xterm colors
         set termguicolors
@@ -51,6 +51,7 @@ else
         autocmd BufEnter * let &titlestring = ' ' . expand("%:t") . '  -  ' . expand("%:p") . '   [' . $USER . '@' . hostname() . ']'
         set title
     endif
+    set pastetoggle=<F2>
 endif
 
 colorscheme bluish
@@ -196,6 +197,8 @@ nmap <silent> <leader>fl o#ifdef __LINUX__
 nmap <silent> <leader>el o#endif	/* __LINUX__  */
 nmap <silent> <leader>fa o#ifdef __ARM__
 nmap <silent> <leader>ea o#endif	/* __ARM__  */
+nmap <silent> <leader>f0 o#if 0
+nmap <silent> <leader>f1 o#if 1
 nmap <silent> <leader>ef o#endif
 nmap <silent> <leader>ee o#else
 
