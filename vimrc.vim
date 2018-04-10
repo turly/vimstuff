@@ -47,9 +47,24 @@ else
         set termguicolors
     endif
     if &term == "xterm" || &term == "xterm-256color"
-        " Set terminal title to be filename - full pat  [user@host]
-        autocmd BufEnter * let &titlestring = ' ' . expand("%:t") . '  -  ' . expand("%:p") . '   [' . $USER . '@' . hostname() . ']'
+        " Set terminal title to be filename - full path  [user@host]
+        if !empty($CLEARCASE_ROOT) 
+            autocmd BufEnter * let &titlestring = ' [' . $CLEARCASE_ROOT . ']  ' . expand("%:t") . '  -  ' . expand("%:p") . '   [' . $USER . '@' . hostname() . ']'
+        else
+            autocmd BufEnter * let &titlestring = expand("%:t") . '  -  ' . expand("%:p") . '   [' . $USER . '@' . hostname() . ']'
+        endif
         set title
+
+		" From http://vim.wikia.com/wiki/Configuring_the_cursor
+  		let &t_SI .= "\<Esc>[3 q"		" blinking underscore for insert mode
+  		let &t_EI .= "\<Esc>[2 q"		" solid block otherwise
+  		" 1 or 0 -> blinking block
+		" 2 -> solid block
+  		" 3 -> blinking underscore
+		" 4 -> solid underscore
+  		" 5 -> blinking vertical bar
+  		" 6 -> solid vertical bar
+  
     endif
     set pastetoggle=<F2>
 endif
@@ -182,8 +197,8 @@ autocmd BufReadPost *
 "highlight shell scripts as per POSIX, not original Bourne shell
 let g:is_posix = 1
 
-" ,n to turn off search highlighting
-nmap <silent> <leader>n :silent :nohlsearch<CR>
+" ,N to turn off search highlighting
+nmap <silent> <leader>N :silent :nohlsearch<CR>
 " ,l to toggle visible whitespace
 nmap <silent> <leader>l :set list!<CR>
 " ,n to toggle line numbers
@@ -198,6 +213,8 @@ nmap <silent> <leader>fl o#ifdef __LINUX__
 nmap <silent> <leader>el o#endif	/* __LINUX__  */
 nmap <silent> <leader>fa o#ifdef __ARM__
 nmap <silent> <leader>ea o#endif	/* __ARM__  */
+nmap <silent> <leader>fb o#if __BYTE_ORDER__ == __BIG_ENDIAN
+nmap <silent> <leader>eb o#endif	/* __BYTE_ORDER__  */
 nmap <silent> <leader>f0 o#if 0
 nmap <silent> <leader>f1 o#if 1
 nmap <silent> <leader>ef o#endif
