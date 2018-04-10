@@ -148,7 +148,7 @@ endif
 if filereadable ("c:/cygwin-1.7.31-3/bin/ctags.exe")
     let g:tagbar_ctags_bin= 'c:/cygwin-1.7.31-3/bin/ctags'
 elseif filereadable ("c:/cygwin/bin/ctags.exe")
-    let g:tagbar_ctags_bin= 'c:/cygwin/bin/ctags.exe'
+    let g:tagbar_ctags_bin= 'c:/cygwin/bin/ctags'
 endif
 
 " When running ctags, add --extra=+f to get filenames.  V. handy for large
