@@ -129,7 +129,7 @@ set autoindent
 set showcmd
 set expandtab
 set backspace=indent,eol,start
-"set hlsearch
+set nohlsearch
 set notimeout
 " Turn off paste for middle mouse button click (scroll wheel accidentally pasting stuff!)
 map <MiddleMouse> <Nop>
@@ -148,7 +148,7 @@ endif
 if filereadable ("c:/cygwin-1.7.31-3/bin/ctags.exe")
     let g:tagbar_ctags_bin= 'c:/cygwin-1.7.31-3/bin/ctags'
 elseif filereadable ("c:/cygwin/bin/ctags.exe")
-    let g:tagbar_ctags_bin= 'c:/cygwin/bin/ctags'
+    let g:tagbar_ctags_bin= 'c:/cygwin/bin/ctags.exe'
 endif
 
 " When running ctags, add --extra=+f to get filenames.  V. handy for large
@@ -243,6 +243,11 @@ set mousehide
 nnoremap ,cd :cd %:p:h<CR>:pwd<CR>  " ,cd to chdir to current file (prints dir afterwards)
 if exists('+shellslash')            " DOS
     set shellslash                  " Get Windows Vim to use forward slashes instead of backslashes
+    set shell=C:/cygwin/bin/bash
+    "set shellcmdflag=--login\ -c
+    set shellcmdflag=-c
+    set shellxquote=\"              " bash wants '"' instead of Windows default '('
+    let $CHERE_INVOKING=1           " bash opens in working directory
 endif
 
 if 1                                        " Clearcase
