@@ -3,6 +3,21 @@
 "
 set nocompatible
 
+if exists('+shellslash')            " DOS
+    set shellslash                  " Get Windows Vim to use forward slashes instead of backslashes
+    set shell=C:/cygwin-2.10.0/bin/bash
+    "set shellcmdflag=--login\ -c
+    set shellcmdflag=-c
+    set shellxquote=\"              " bash wants '"' instead of Windows default '('
+    let $CHERE_INVOKING=1           " bash opens in working directory
+    if isdirectory ("C:/Temp")
+        set backupdir=C:/Temp
+        set directory=C:/Temp       " swap files
+        let TMPDIR='C:/Temp'
+    endif
+endif
+
+
 " See https://github.com/VundleVim/Vundle.vim
 " To update: vim -c VundleUpdate -c quitall
 set rtp+=~/.vim/bundle/Vundle.vim
@@ -25,9 +40,15 @@ filetype plugin indent on    " required
 " :PluginSearch foo - searches for foo; append `!` to refresh local cache
 " :PluginClean      - confirms removal of unused plugins; append `!` to auto-approve removal
 
+" Experiment with vim infinite undo
+"set undofile
+"set undodir=~/.vim/undodir
+
 set encoding=utf-8    " Needed for patched powerline fonts (internal to vim I think)
 let mapleader = ","
 set background=dark
+set number
+
 if has("gui_running")
     set guioptions-=T           " no clunky toolbar (bozo icons)
     set guioptions+=c           " no Windows dialogs
@@ -35,13 +56,15 @@ if has("gui_running")
     set guifont=Anonymous\ Pro\ for\ Powerline\ 11,Anonymice_Powerline:h11
     set lines=42
     set columns=100
-    "set number
+    " Tab name is filename only with modification '+' if appropriate
+    set guitablabel=%t\ %M
+    " Turn all buffers into tabs
+    nmap <silent> <leader>t :tab sball<CR>
     "set ruler
-    set cursorline
 else
-    set ttyfast                 "tf:    improves redrawing for newer computers
-    set t_Co=256                " This is may or may not needed.
-    set mouse=a                 " Enabling this allows mouse-clicks (COPY/PASTE with SHIFT-[right-]clicks)
+    set ttyfast         "tf:    improves redrawing for newer computers
+    set t_Co=256        " 256 colors
+    set mouse=a         " Enabling this allows mouse-clicks (COPY/PASTE with SHIFT-[right-]clicks)
     let &runtimepath.=',~/vimfiles'     " get .../colors and .../after here
     if (has("termguicolors"))           " 24-bit xterm colors
         set termguicolors
@@ -55,21 +78,23 @@ else
         endif
         set title
 
-		" From http://vim.wikia.com/wiki/Configuring_the_cursor
-  		let &t_SI .= "\<Esc>[3 q"		" blinking underscore for insert mode
-  		let &t_EI .= "\<Esc>[2 q"		" solid block otherwise
-  		" 1 or 0 -> blinking block
-		" 2 -> solid block
-  		" 3 -> blinking underscore
-		" 4 -> solid underscore
-  		" 5 -> blinking vertical bar
-  		" 6 -> solid vertical bar
-  
+        " From http://vim.wikia.com/wiki/Configuring_the_cursor
+        let &t_SI .= "\<Esc>[3 q"		" blinking underscore for insert mode
+        let &t_EI .= "\<Esc>[2 q"		" solid block otherwise
+        " 1 or 0 -> blinking block
+        " 2 -> solid block
+        " 3 -> blinking underscore
+        " 4 -> solid underscore
+        " 5 -> blinking vertical bar
+        " 6 -> solid vertical bar
     endif
-    set pastetoggle=<F2>
 endif
 
+"Ctrl-F2 toggles cursorline
+map <C-F2> :set cursorline!<CR>
 colorscheme bluish
+autocmd InsertEnter * highlight CursorLine guibg=#303050 ctermbg=23
+autocmd InsertLeave * highlight CursorLine guibg=#383838 ctermbg=237
 
 set laststatus=2
 let g:lightline = {
@@ -84,10 +109,19 @@ let g:lightline = {
       \ 'subseparator': { 'left': "\ue0b1", 'right': "\ue0b3" }
       \ }
 
+" Buffer shenanigans
+" move among buffers with CTRL
+map <C-J> :bnext<CR>
+map <C-K> :bprev<CR>
+" Ctrl-E "Edit Buffer" shows buffer list and you just type the number
+nnoremap <C-e> :set nomore <Bar> :ls <Bar> :set more <CR>:b<Space>
+
 " Prefer LF line endings
 set fileformat=unix
 set fileformats=unix,dos
 set pastetoggle=<F3>    " Turns off autoindent, etc when pasting code into vim
+
+set formatoptions+=j " Delete comment character when joining commented lines
 
 let c_gnu=1
 let c_ansi_typedefs=1
@@ -108,6 +142,9 @@ set switchbuf=useopen       "swb:   Jumps to first window that contains
 "Only ignore case when we type lower case when searching
 set ignorecase
 set smartcase
+"https://vi.stackexchange.com/questions/11393/disable-case-sensitive-auto-completion-while-smartcase-search-is-enabled
+au InsertEnter * set noignorecase
+au InsertLeave * set ignorecase
 "Silent bell
 set visualbell
 set hidden  " allow background buffers to be in a modified state (when tag jumping etc.)
@@ -127,7 +164,7 @@ set nrformats-=octal
 
 set autoindent
 set showcmd
-set expandtab
+set expandtab       " but see au BufReadPost *.c,*.h below
 set backspace=indent,eol,start
 set nohlsearch
 set notimeout
@@ -140,15 +177,10 @@ set scrolloff=2
 
 set showmatch
 "set noswapfile
-if isdirectory ("C:/Temp")
-    set backupdir=C:/Temp
-    set directory=C:/Temp
-endif
-
-if filereadable ("c:/cygwin-1.7.31-3/bin/ctags.exe")
+if filereadable ("c:/cygwin-2.10.0/bin/ctags.exe")
+    let g:tagbar_ctags_bin= 'c:/cygwin-2.10.0/bin/ctags'
+elseif filereadable ("c:/cygwin-1.7.31-3/bin/ctags.exe")
     let g:tagbar_ctags_bin= 'c:/cygwin-1.7.31-3/bin/ctags'
-elseif filereadable ("c:/cygwin/bin/ctags.exe")
-    let g:tagbar_ctags_bin= 'c:/cygwin/bin/ctags'
 endif
 
 " When running ctags, add --extra=+f to get filenames.  V. handy for large
@@ -203,6 +235,8 @@ nmap <silent> <leader>N :silent :nohlsearch<CR>
 nmap <silent> <leader>l :set list!<CR>
 " ,n to toggle line numbers
 nmap <silent> <leader>n :set number!<CR>
+" ,b to make all buffers into tabs
+"nmap <silent> <leader>b :bufdo tab split<CR>
 "Shift-tab to insert a hard tab
 "imap <silent> <S-tab> <C-v><tab>
 
@@ -220,6 +254,13 @@ nmap <silent> <leader>f1 o#if 1
 nmap <silent> <leader>ef o#endif
 nmap <silent> <leader>ee o#else
 
+" A bunch of background-colour alterations to change the background color
+" to differentiate windows
+nmap <silent> <leader>1 :hi Normal ctermbg=232 guibg=#080808<CR>
+nmap <silent> <leader>2 :hi Normal ctermbg=234 guibg=#1c1c1c<CR>
+nmap <silent> <leader>3 :hi Normal ctermbg=235 guibg=#262626<CR>
+nmap <silent> <leader>4 :hi Normal ctermbg=236 guibg=#303030<CR>
+
 " When a popup menu is visible, make ENTER select the item instead of
 " inserting a newline
 inoremap <expr> <CR> pumvisible() ? "\<C-y>" : "\<C-g>u\<CR>"
@@ -228,6 +269,7 @@ inoremap <expr> <CR> pumvisible() ? "\<C-y>" : "\<C-g>u\<CR>"
 set nofoldenable
 " F2 - Toggle fold at #if to the matching #else or #endif.  Use zo / zc to open/close fold
 "      ...and to avoid searching inside folds, use:  set fdo-=search
+set fdo-=search     " by default, no searching inside folds
 nnoremap <F2> V%zf
 " Space toggles fold if there's one there
 nnoremap <silent> <Space> @=(foldlevel('.')?'za':"\<Space>")<CR>
@@ -241,14 +283,6 @@ map! <S-Insert> <MiddleMouse>
 set mousehide
 
 nnoremap ,cd :cd %:p:h<CR>:pwd<CR>  " ,cd to chdir to current file (prints dir afterwards)
-if exists('+shellslash')            " DOS
-    set shellslash                  " Get Windows Vim to use forward slashes instead of backslashes
-    set shell=C:/cygwin/bin/bash
-    "set shellcmdflag=--login\ -c
-    set shellcmdflag=-c
-    set shellxquote=\"              " bash wants '"' instead of Windows default '('
-    let $CHERE_INVOKING=1           " bash opens in working directory
-endif
 
 if 1                                        " Clearcase
     function! DosExpandCurrentFile()        " Full DOS pathname of current file
@@ -259,7 +293,7 @@ if 1                                        " Clearcase
         endif
     endfun
     function! CleartoolCheckout()
-        echom system ("cleartool co -unr -nmaster -nc " . DosExpandCurrentFile())
+        echom system ("cleartool co -unr -nmaster -nc '" . DosExpandCurrentFile() . "'")
         if &modified == 1
             echoerr "ERROR: Not auto-loading file as buffer has been modified"
         else
@@ -267,12 +301,12 @@ if 1                                        " Clearcase
         endif
     endfun
     command! Ctcou call CleartoolCheckout()
-    command! Cvtree echom system ("clearvtree " . DosExpandCurrentFile())
+    command! Cvtree echom system ("clearvtree '" . DosExpandCurrentFile() . "'")
 
     function! CleartoolUnCo()               " Cleartool UnCheckout
         let choice = confirm ("Uncheckout " . expand ("%.p") . " ?", "&Yes\n&No", 2)
         if choice == 1
-            echom system ("cleartool unco -keep " . DosExpandCurrentFile())
+            echom system ("cleartool unco -keep '" . DosExpandCurrentFile() . "'")
         endif
     endfunction
     command! Ctunco call CleartoolUnCo()
@@ -282,6 +316,7 @@ if 1                                        " Clearcase
       "     Checked in "/dir/file" version "\main\47".
       " ->
       "     element /dir/file    /main/47
+      execute 'g/cleartool: Warning: Version checked in is not selected by view./d'
       execute '%s/^Checked in "/element /g'
       execute '%s/" version "/    /g'
       execute '%s/\\/\//g'
@@ -291,6 +326,8 @@ if 1                                        " Clearcase
 
 endif                                       " Clearcase 
 
+" Header files generally live one folder up inside a 'h' dir
+set path+=../h
 command! Trimws execute '%s/\s*$//g'   " trim trailing whitespace
 
 " I keep on pressing capital-W / capital-Q
@@ -301,6 +338,29 @@ command! Q q
 
 map Q nop   " Disable "Entering Ex mode" cruft
 
-" Tab name is filename only with modification '+' if appropriate
-set guitablabel=%t\ %M
+
+" Stop auto-adding comment leaders 
+au FileType * set fo-=c fo-=r fo-=o
+
+" Some people's C source uses hard tabs - ensure I do the same when editing those files
+function! CheckRealTabs()
+    let hards = 0
+    let softs = 0
+    for line in getline(1, 384)             " Checking first 400-odd lines should be fine
+        if !len (line) || line =~# '^\s*$'  " empty or just whitespace-only line doesn't count
+            continue
+        endif
+        if line =~# '^\t'                   " begins with a TAB
+            let hards += 1
+        elseif line =~# '^ '                " begins with a space
+            let softs += 1
+        endif
+    endfor
+    "echo 'hards: ' . hards . ', softs: ' . softs
+    if (hards > softs)
+        set noexpandtab
+    endif
+endfunction
+
+au BufReadPost *.c,*.h call CheckRealTabs()
 
