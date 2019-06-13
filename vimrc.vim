@@ -2,6 +2,8 @@
 "Cobbled together from various sources since 2001 !
 "
 set nocompatible
+set modelines=0
+set nomodeline                      " Be safe! See CVE-2019-12735
 
 if exists('+shellslash')            " DOS
     set shellslash                  " Get Windows Vim to use forward slashes instead of backslashes
