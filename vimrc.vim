@@ -55,7 +55,7 @@ if has("gui_running")
     set guioptions-=T           " no clunky toolbar (bozo icons)
     set guioptions+=c           " no Windows dialogs
     " This will stop at the first fontname that exists.
-    set guifont=Anonymous\ Pro\ for\ Powerline\ 11,Anonymice_Powerline:h11
+    set guifont=Go\ Mono\ for\ Powerline\ 11,Anonymous\ Pro\ for\ Powerline\ 11,Anonymice_Powerline:h11
     set lines=42
     set columns=100
     " Tab name is filename only with modification '+' if appropriate
