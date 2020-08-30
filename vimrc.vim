@@ -5,6 +5,8 @@ set nocompatible
 set modelines=0
 set nomodeline                      " Be safe! See CVE-2019-12735
 
+let s:using_promptline_p = 0
+
 if exists('+shellslash')            " DOS
     set shellslash                  " Get Windows Vim to use forward slashes instead of backslashes
     set shell=C:/cygwin-2.10.0/bin/bash
@@ -32,6 +34,16 @@ nmap <F8> :TagbarToggle<CR>
 "Plugin 'ipod825/TagJump'
 
 Plugin 'itchyny/lightline.vim'
+Plugin 'arcticicestudio/nord-vim'
+
+if s:using_promptline_p
+    " Prompt stuff for bash and tmux - v nice
+    " https://github.com/edkolev/promptline.vim and https://github.com/edkolev/tmuxline.vim
+    " See bottom of this file for usage instructions
+
+    Plugin 'edkolev/promptline.vim'
+    Plugin 'edkolev/tmuxline.vim'
+endif
 
 " All of your Plugins must be added before the following line
 call vundle#end()            " required
@@ -63,17 +75,19 @@ if has("gui_running")
     " Turn all buffers into tabs
     nmap <silent> <leader>t :tab sball<CR>
     "set ruler
+    "Allow huge Buffers menu
+    let &menuitems=50
 else
-    set ttyfast         "tf:    improves redrawing for newer computers
-    set t_Co=256        " 256 colors
-    set mouse=a         " Enabling this allows mouse-clicks (COPY/PASTE with SHIFT-[right-]clicks)
+    set ttyfast                 "tf:    improves redrawing for newer computers
+    set t_Co=256                " This is may or may not needed.
+    set mouse=a                 " Enabling this allows mouse-clicks (COPY/PASTE with SHIFT-[right-]clicks)
     let &runtimepath.=',~/vimfiles'     " get .../colors and .../after here
     if (has("termguicolors"))           " 24-bit xterm colors
         set termguicolors
     endif
-    if &term == "xterm" || &term == "xterm-256color"
+    if &term == "xterm" || &term == "xterm-256color" || &term == "screen-256color"
         " Set terminal title to be filename - full path  [user@host]
-        if !empty($CLEARCASE_ROOT) 
+        if !empty($CLEARCASE_ROOT)
             autocmd BufEnter * let &titlestring = ' [' . $CLEARCASE_ROOT . ']  ' . expand("%:t") . '  -  ' . expand("%:p") . '   [' . $USER . '@' . hostname() . ']'
         else
             autocmd BufEnter * let &titlestring = expand("%:t") . '  -  ' . expand("%:p") . '   [' . $USER . '@' . hostname() . ']'
@@ -81,8 +95,13 @@ else
         set title
 
         " From http://vim.wikia.com/wiki/Configuring_the_cursor
-        let &t_SI .= "\<Esc>[3 q"		" blinking underscore for insert mode
-        let &t_EI .= "\<Esc>[2 q"		" solid block otherwise
+        "let &t_SI .= "\<Esc>[3 q"              " blinking underscore for insert mode
+        "let &t_EI .= "\<Esc>[2 q"              " solid block otherwise
+        " From https://github.com/mintty/mintty/wiki/Tips
+        let &t_ti.="\e[1 q"
+        let &t_SI.="\e[5 q"             " blinking vertical bar cursor for insert mode
+        let &t_EI.="\e[1 q"             " blinking solid block otherwise
+        let &t_te.="\e[0 q"
         " 1 or 0 -> blinking block
         " 2 -> solid block
         " 3 -> blinking underscore
@@ -94,12 +113,32 @@ endif
 
 "Ctrl-F2 toggles cursorline
 map <C-F2> :set cursorline!<CR>
-colorscheme bluish
 autocmd InsertEnter * highlight CursorLine guibg=#303050 ctermbg=23
 autocmd InsertLeave * highlight CursorLine guibg=#383838 ctermbg=237
 
+"colorscheme bluish
+
+let g:nord_italic = 1
+let g:nord_bold = 1
+let g:nord_italic_comments = 1
+augroup nord-theme-overrides
+  autocmd!
+  " Make comments Magenta (Nord15)
+  autocmd ColorScheme nord highlight Comment ctermfg=5 guifg=#B48EAD
+
+  "Make Nord's default background a bit darker (2E3440 -> 1C242C)
+  "autocmd ColorScheme nord highlight Normal ctermbg=234 guibg=#1C242C
+  autocmd ColorScheme nord highlight Normal ctermbg=234 guibg=#212430
+
+augroup END
+
+colorscheme nord
+
 set laststatus=2
+set noshowmode  " unnecessary with lightline
+
 let g:lightline = {
+      \ 'colorscheme' : g:colors_name,
       \ 'component': {
       \   'readonly': '%{&readonly?"\ue0a2":""}',
       \   'tagbar': '%{tagbar#currenttag("[%s]", "", "f")}',
@@ -123,7 +162,7 @@ set fileformat=unix
 set fileformats=unix,dos
 set pastetoggle=<F3>    " Turns off autoindent, etc when pasting code into vim
 
-set formatoptions+=j " Delete comment character when joining commented lines
+set formatoptions+=j    " Delete comment character when joining commented lines
 
 let c_gnu=1
 let c_ansi_typedefs=1
@@ -131,12 +170,10 @@ let c_comment_strings=1
 let c_no_if0_fold=1     " bug? in syntax/c.vim causes problems if '#endif' for '#if 0' is not on column zero
 
 syntax on
-"We don't want the syntax menu, just say we've already installed it.
-"let did_install_syntax_menu=1  " doesn't seem to work on vim8.0
 
 " These need to appear AFTER syntax has been enabled
-hi PreProc gui=italic
-hi Comment gui=italic
+"hi PreProc gui=italic cterm=italic
+"hi Comment gui=italic cterm=italic
 
 set switchbuf=useopen       "swb:   Jumps to first window that contains
                             "specified buffer instead of duplicating an open window
@@ -222,6 +259,13 @@ autocmd BufReadPost *
     \   exe "normal g`\"" |
     \ endif
 
+
+" https://vim.fandom.com/wiki/Identify_the_syntax_highlighting_group_used_at_the_cursor
+map <F10> :echo "hi<" . synIDattr(synID(line("."),col("."),1),"name") . '> trans<'
+    \ . synIDattr(synID(line("."),col("."),0),"name") . "> lo<"
+    \ . synIDattr(synIDtrans(synID(line("."),col("."),1)),"name") . ">"<CR>
+
+
 " Ctrl-Enter - tag in new tab
 "nmap <C-Enter> <C-w><C-]><C-w>T
 
@@ -262,6 +306,8 @@ nmap <silent> <leader>1 :hi Normal ctermbg=232 guibg=#080808<CR>
 nmap <silent> <leader>2 :hi Normal ctermbg=234 guibg=#1c1c1c<CR>
 nmap <silent> <leader>3 :hi Normal ctermbg=235 guibg=#262626<CR>
 nmap <silent> <leader>4 :hi Normal ctermbg=236 guibg=#303030<CR>
+nmap <silent> <leader>5 :hi Normal ctermbg=234 guibg=#1C2430<CR>
+nmap <silent> <leader>6 :hi Normal ctermbg=237 guibg=#2E3440<CR>
 
 " When a popup menu is visible, make ENTER select the item instead of
 " inserting a newline
@@ -278,8 +324,11 @@ nnoremap <silent> <Space> @=(foldlevel('.')?'za':"\<Space>")<CR>
 
 
 " Make shift-insert work like in Xterm
-map <S-Insert> <MiddleMouse>
-map! <S-Insert> <MiddleMouse>
+"map <S-Insert> <MiddleMouse>
+"map! <S-Insert> <MiddleMouse>
+
+" Shift-Insert pastes from System Clipboard
+nnoremap <S-Insert>     "+P
 
 " Hide the mouse pointer while typing
 set mousehide
@@ -326,7 +375,7 @@ if 1                                        " Clearcase
     endfunction
     command! Fixcs call FixupCs()
 
-endif                                       " Clearcase 
+endif                                       " Clearcase
 
 " Header files generally live one folder up inside a 'h' dir
 set path+=../h
@@ -341,7 +390,7 @@ command! Q q
 map Q nop   " Disable "Entering Ex mode" cruft
 
 
-" Stop auto-adding comment leaders 
+" Stop auto-adding comment leaders
 au FileType * set fo-=c fo-=r fo-=o
 
 " Some people's C source uses hard tabs - ensure I do the same when editing those files
@@ -360,9 +409,93 @@ function! CheckRealTabs()
     endfor
     "echo 'hards: ' . hards . ', softs: ' . softs
     if (hards > softs)
-        set noexpandtab
+        setl noexpandtab
     endif
 endfunction
 
 au BufReadPost *.c,*.h call CheckRealTabs()
+
+" Dots and slashes etc should be bold
+hi Operator             term=bold cterm=bold gui=bold
+hi Function             term=bold cterm=bold gui=bold guifg=#88C0D0             " Nord8
+hi Statement            guifg=#8FBCBB                                           " Nord7
+hi Number               guifg=#D8DEE9                                           " Nord4
+hi Identifier           guifg=#E5E9F0                                           " Nord5
+hi Keyword              term=bold cterm=bold gui=bold ctermfg=11 guifg=#EBCB8B  " Nord13
+hi Conditional          term=bold cterm=bold gui=bold ctermfg=11 guifg=#EBCB8B  " Nord13
+hi Repeat               term=bold cterm=bold gui=bold ctermfg=11 guifg=#EBCB8B  " Nord13
+hi Type                 term=bold cterm=bold gui=bold guifg=#8FBCBB             " Nord7
+hi Boolean              term=bold cterm=bold gui=bold
+hi Delimiter            term=bold cterm=bold gui=bold guifg=#B48EAD             " Nord15
+hi cFunction            guifg=#88C0D0                                           " Nord8
+hi cConditional         term=bold cterm=bold gui=bold ctermfg=11 guifg=#EBCB8B  " Nord13
+hi cRepeat              term=bold cterm=bold gui=bold ctermfg=11 guifg=#EBCB8B  " Nord13
+hi cLabel               guifg=#B48EAD                                           " Nord15
+
+
+" ############################################################
+" Disable the promptline stuff until I actually need to use it
+" ############################################################
+
+if s:using_promptline_p
+    " Tossing the space chars compresses the prompt.
+    " Use:  PromptlineSnapshot FILENAME lightline (or lightline_visual)
+    " Remember: make changes here, quit vim, reload, :PromptlineSnapshot FILENAME lightline
+
+    let s:using_powline_syms_p = 1
+
+    if s:using_powline_syms_p == 0
+        let g:promptline_powerline_symbols = 0
+        let g:promptline_symbols = {
+            \ 'left'       : '',
+            \ 'left_alt'   : '',
+            \ 'dir_sep'    : '/',
+            \ 'truncation' : '...',
+            \ 'vcs_branch' : '',
+            \ 'space'      : ''}
+    else
+        let g:promptline_symbols = {
+            \ 'left_alt'   : '',
+            \ 'dir_sep'    : '/',
+            \ 'space'      : ''}
+    endif
+
+    let user_host_viewspec = {
+          \'function_name': 'get_user_host_viewspec',
+          \'function_body': [
+            \'function get_user_host_viewspec {',
+            \'  local user=$USER',
+            \'  local start=""',
+            \'  local ccvt=""',
+            \'  if [ -n "$SSH_CONNECTION" ]; then start="\h" ; elif [ -n "$CC_VIEW_SPEC" ]; then start="$CC_VIEW_SPEC"; fi',
+            \'  if [ "$user" == "Turly" ]; then user="" ; fi  # i know who i am, thanks',
+            \'  if [ -n "$CC_VIEW_TAG" -a "$CC_VIEW_TAG" != "**NONE**" ]; then ccvt="$CC_VIEW_TAG"; fi',
+            \'  # start, user, ccvt - may need to insert spaces',
+            \'  if [ "$start" != "" ]; then if [ "$user" != "" -o "$ccvt" != "" ]; then start="$start:" ; fi ; fi  # append space',
+            \'  if [ "$user" != "" -a "$ccvt" != "" ]; then user="$user " ; fi  # append space',
+            \'  if [ "$start$user$ccvt" != "" ]; then ccvt="$ccvt "; fi  # appending final space if we have anything at all',
+            \'  printf "%s" "$start$user$ccvt"',
+            \'}']}
+
+    let cc_branch = {
+          \'function_name': 'get_cc_branch',
+          \'function_body': [
+            \'function get_cc_branch {',
+            \'  local spc=""',
+            \'  if [ -n "$CC_BRANCH" ]; then echo "\e[93m$CC_BRANCH " ; fi  # appending final space',
+            \'}']}
+
+    " a b c x y z
+    " Italicise the working directory e[3m \w e[0m
+    " Make the CC_BRANCH bit be a yellow/orange
+    let g:promptline_preset = {
+            \'a' : [ user_host_viewspec ],
+            \'b' : [ cc_branch ],
+            \'c' : [ '\e[35m\A ' ],
+            \'z' : [ '\e[3m',  promptline#slices#cwd() ],
+            \'warn' : [ '$PROMPTLINE_RC' ]}
+
+    let g:tmuxline_powerline_separators = 1
+
+endif   " s:using_promptline_p
 
