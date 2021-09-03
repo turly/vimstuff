@@ -75,8 +75,9 @@ if has("gui_running")
     " Turn all buffers into tabs
     nmap <silent> <leader>t :tab sball<CR>
     "set ruler
-    "Allow huge Buffers menu
+    "Allow huge Buffers menu and gazillions of tabs
     let &menuitems=50
+    let &tabpagemax=50
 else
     set ttyfast                 "tf:    improves redrawing for newer computers
     set t_Co=256                " This is may or may not needed.
@@ -95,8 +96,8 @@ else
         set title
 
         " From http://vim.wikia.com/wiki/Configuring_the_cursor
-        "let &t_SI .= "\<Esc>[3 q"              " blinking underscore for insert mode
-        "let &t_EI .= "\<Esc>[2 q"              " solid block otherwise
+        "let &t_SI .= "\<Esc>[3 q"		" blinking underscore for insert mode
+        "let &t_EI .= "\<Esc>[2 q"		" solid block otherwise
         " From https://github.com/mintty/mintty/wiki/Tips
         let &t_ti.="\e[1 q"
         let &t_SI.="\e[5 q"             " blinking vertical bar cursor for insert mode
@@ -130,6 +131,8 @@ augroup nord-theme-overrides
   "autocmd ColorScheme nord highlight Normal ctermbg=234 guibg=#1C242C
   autocmd ColorScheme nord highlight Normal ctermbg=234 guibg=#212430
 
+  " Make folds look a bit bluer
+  autocmd ColorScheme nord highlight Folded ctermbg=23 guibg=#212440
 augroup END
 
 colorscheme nord
@@ -181,6 +184,8 @@ set switchbuf=useopen       "swb:   Jumps to first window that contains
 "Only ignore case when we type lower case when searching
 set ignorecase
 set smartcase
+"Whole word searching
+nnoremap ww/ /\<\><left><left>
 "https://vi.stackexchange.com/questions/11393/disable-case-sensitive-auto-completion-while-smartcase-search-is-enabled
 au InsertEnter * set noignorecase
 au InsertLeave * set ignorecase
@@ -199,7 +204,7 @@ set wildmode=list:longest    "filename completion
 set complete=.,w,b,u,t
 set tabstop=4
 set shiftwidth=4
-set nrformats-=octal
+set nrformats-=octal    " Interpret octal as decimal when incrementing with Ctrl-A etc
 
 set autoindent
 set showcmd
@@ -467,11 +472,12 @@ if s:using_promptline_p
             \'  local user=$USER',
             \'  local start=""',
             \'  local ccvt=""',
-            \'  if [ -n "$SSH_CONNECTION" ]; then start="\h" ; elif [ -n "$CC_VIEW_SPEC" ]; then start="$CC_VIEW_SPEC"; fi',
-            \'  if [ "$user" == "Turly" ]; then user="" ; fi  # i know who i am, thanks',
+            \'  # For CC_VIEW_SPEC, change to yellow background for drive-letter+colon, then *hardwired* change back to cyan background',
+            \'  if [ -n "$SSH_CONNECTION" ]; then start="\h" ; elif [ -n "$CC_VIEW_SPEC" ]; then start="\e[43m$CC_VIEW_SPEC:\e[46m"; fi',
+            \'  if [ "${user,,}" == "turly" ]; then user="" ; fi  # (,, lowercases so matches turly/Turly)',
             \'  if [ -n "$CC_VIEW_TAG" -a "$CC_VIEW_TAG" != "**NONE**" ]; then ccvt="$CC_VIEW_TAG"; fi',
             \'  # start, user, ccvt - may need to insert spaces',
-            \'  if [ "$start" != "" ]; then if [ "$user" != "" -o "$ccvt" != "" ]; then start="$start:" ; fi ; fi  # append space',
+            \'  # if [ "$start" != "" ]; then if [ "$user" != "" -o "$ccvt" != "" ]; then start="$start:" ; fi ; fi  # append colon
             \'  if [ "$user" != "" -a "$ccvt" != "" ]; then user="$user " ; fi  # append space',
             \'  if [ "$start$user$ccvt" != "" ]; then ccvt="$ccvt "; fi  # appending final space if we have anything at all',
             \'  printf "%s" "$start$user$ccvt"',
@@ -482,12 +488,14 @@ if s:using_promptline_p
           \'function_body': [
             \'function get_cc_branch {',
             \'  local spc=""',
-            \'  if [ -n "$CC_BRANCH" ]; then echo "\e[93m$CC_BRANCH " ; fi  # appending final space',
+            \'  if [ -n "$CC_BRANCH" ]; then echo "\e[93m$CC_BRANCH " ; fi  # colorize and append final space',
             \'}']}
 
     " a b c x y z
     " Italicise the working directory e[3m \w e[0m
     " Make the CC_BRANCH bit be a yellow/orange
+    "        \'z' : [ '\e[3m',  promptline#slices#cwd() ],
+    "        \'z' : [ '\e[3m\w' ],
     let g:promptline_preset = {
             \'a' : [ user_host_viewspec ],
             \'b' : [ cc_branch ],
