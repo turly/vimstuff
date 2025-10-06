@@ -359,14 +359,17 @@ nmap <silent> <leader>n :set number!<CR>
 "Shift-tab to insert a hard tab
 "imap <silent> <S-tab> <C-v><tab>
 
-" A bunch of background-colour alterations to change the background color
-" to differentiate windows
-nmap <silent> <leader>1 :hi Normal ctermbg=232 guibg=#080808<CR>
-nmap <silent> <leader>2 :hi Normal ctermbg=234 guibg=#1c1c1c<CR>
-nmap <silent> <leader>3 :hi Normal ctermbg=235 guibg=#262626<CR>
-nmap <silent> <leader>4 :hi Normal ctermbg=236 guibg=#303030<CR>
-nmap <silent> <leader>5 :hi Normal ctermbg=234 guibg=#1C2430<CR>
-nmap <silent> <leader>6 :hi Normal ctermbg=237 guibg=#2E3440<CR>
+if &background == "dark"
+    " A bunch of background-colour alterations to change the background color
+    " to differentiate editor windows
+    nmap <silent> <leader>1 :hi Normal ctermbg=232 guibg=#080808<CR>
+    nmap <silent> <leader>2 :hi Normal ctermbg=234 guibg=#1c1c1c<CR>
+    nmap <silent> <leader>3 :hi Normal ctermbg=235 guibg=#262626<CR>
+    nmap <silent> <leader>4 :hi Normal ctermbg=236 guibg=#303030<CR>
+    nmap <silent> <leader>5 :hi Normal ctermbg=234 guibg=#1C2430<CR>
+    nmap <silent> <leader>6 :hi Normal ctermbg=237 guibg=#2E3440<CR>
+    " else make light versions of these
+endif
 
 " When a popup menu is visible, make ENTER select the item instead of inserting a newline
 inoremap <expr> <CR> pumvisible() ? "\<C-y>" : "\<C-g>u\<CR>"
@@ -391,8 +394,8 @@ nnoremap ,cd :cd %:p:h<CR>:pwd<CR>  " ,cd to chdir to current file (prints dir a
 
 " Header files often live one folder up inside a 'h' dir
 set path+=../h
-command! Trimws execute '%s/\s*$//g'   " trim trailing whitespace
-
+command! Trimws execute '%s/\s*$//g'    " trim trailing whitespace - now done by default for C files
+                                        " See the "BufWritePre" autocmd below
 " I keep on pressing capital-W / capital-Q
 command! WQ wq
 command! Wq wq
@@ -401,11 +404,15 @@ command! Q q
 
 map Q nop   " Disable "Entering Ex mode" cruft
 
+" From https://stackoverflow.com/questions/2600783/how-does-the-vim-write-with-sudo-trick-work
+" Allow saving of files as sudo when I forgot to start vim using sudo.
+cmap w!! w !sudo tee > /dev/null %
+
 
 " Roll our own status line - based on https://gist.github.com/ericbn/f2956cd9ec7d6bff8940c2087247b132
 "set noshowmode  " Avoid displaying stuff like '-- INSERT --' at the bottom of the screen
 
-" Statusline with highlight groups (requires Powerline font)
+" Statusline with highlight groups (requires Powerline-style font)
 set statusline=
 set statusline+=%(%{&buflisted?bufnr('%'):''}\ \ %)
 set statusline+=%t\  " Filename tail
@@ -451,6 +458,9 @@ if has("autocmd")
       \ if line("'\"") >= 1 && line("'\"") <= line("$") && &ft !~# 'commit'
       \ |   exe "normal! g`\""
       \ | endif
+
+    "From https://vim.fandom.com/wiki/Remove_unwanted_spaces
+    autocmd FileType c,cpp,java,php,vim autocmd BufWritePre <buffer> %s/\s\+$//e
 
     " Some people's C source uses hard tabs - ensure I do the same when editing those files
     function! CheckRealTabs()
@@ -506,18 +516,18 @@ augroup quickfix
 augroup END
 
 " Map ]q for next QuickFix error, [q for previous, ]Q for last, [Q for first, ]^Q for next file, [^Q for prev file
-nnoremap <silent> ]q :cnext<CR>  
+nnoremap <silent> ]q :cnext<CR>
 nnoremap <silent> [q :cprev<CR>
-nnoremap <silent> ]Q :clast<CR>  
+nnoremap <silent> ]Q :clast<CR>
 nnoremap <silent> [Q :cfirst<CR>
-nnoremap <silent> ]<C-Q> :cnfile<CR>  
+nnoremap <silent> ]<C-Q> :cnfile<CR>
 nnoremap <silent> [<C-Q> :cpfile<CR>
 " Location List
-nnoremap <silent> ]l :lnext<CR>  
+nnoremap <silent> ]l :lnext<CR>
 nnoremap <silent> [l :lprev<CR>
-nnoremap <silent> ]L :llast<CR>  
+nnoremap <silent> ]L :llast<CR>
 nnoremap <silent> [L :lfirst<CR>
-nnoremap <silent> ]<C-L> :lnfile<CR>  
+nnoremap <silent> ]<C-L> :lnfile<CR>
 nnoremap <silent> [<C-L> :lpfile<CR>
 " Show/hide the QuickFix/LocationList window
 nnoremap <Leader>co :copen<CR>
