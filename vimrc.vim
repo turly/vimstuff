@@ -65,8 +65,8 @@ else                            " TTY
     let &t_ZH="\e[3m"
     let &t_ZR="\e[23m"
     " Also switch cursors based on insert mode
-    "let &t_SI="\e[5 q"
-    "let &t_EI="\e[0 q"
+    let &t_SI="\e[5 q"
+    let &t_EI="\e[0 q"
 
     set ttimeout
     set ttimeoutlen=128                     "millisecs for key sequences to complete
@@ -239,6 +239,8 @@ map F :call ShowFuncName(1) <CR>
 
 " Clearcase cruft
 
+" Find Git Merge conflict
+nnoremap <leader>gm /\v^\<\<\<\<\<\<\< \|\=\=\=\=\=\=\=$\|\>\>\>\>\>\>\> /<cr>
 
 " move among buffers with CTRL
 map <C-J> :bnext<CR>
@@ -299,6 +301,7 @@ set confirm " comfirm before deleting buffer with unsaved changes
 set wildmenu
 "Ignore these files when completing names and in Explorer
 set wildignore=.svn,CVS,.git,*.o,*.a,*.class,*.mo,*.la,*.so,*.obj,*.swp,*.jpg,*.png,*.xpm,*.gif
+"set wildmode=longest:full,full    "filename completion
 set wildmode=list:longest    "filename completion
 
 " Ctrl-P/Ctrl-N ins-completion options - current buffer, current window,
@@ -324,9 +327,20 @@ set scrolloff=2
 " When running ctags, add --extra=+f to get filenames.  V. handy for large
 " projects - can then just say :tj foo.c  - et voila.  See also "gf" (below.)
 set tags=tags
-if isdirectory ($PROJECT_TAGS)
+if !empty ($PROJECT_TAGS) && isdirectory ($PROJECT_TAGS)
     set tags=$PROJECT_TAGS/phnx_tags
 endif
+
+" Cscope
+if !empty ($CSCOPE_DB)
+    if filereadable ($CSCOPE_DB)
+        cscope add $CSCOPE_DB
+    endif
+endif
+" ^\ s Find C symbol
+" ^\ c Find functions calling this function
+nmap <C-\>s :cs find s <C-R>=expand("<cword>")<CR><CR>
+nmap <C-\>c :cs find c <C-R>=expand("<cword>")<CR><CR>
 
 " gf - go to file under cursor - if filename is in taglist, use tags.
 " http://vim.1045645.n5.nabble.com/cscope-best-practices-td5717670.html
@@ -500,7 +514,7 @@ command! ToMac execute 'e! ++ff=mac'
 set grepprg=ag\ --vimgrep
 
 function! Grep(...)
-	return system(join([&grepprg] + [expandcmd(join(a:000, ' '))], ' '))
+    return system(join([&grepprg] + [expandcmd(join(a:000, ' '))], ' '))
 endfunction
 
 command! -nargs=+ -complete=file_in_path -bar Grep  cgetexpr Grep(<f-args>)
@@ -510,9 +524,9 @@ cnoreabbrev <expr> grep  (getcmdtype() ==# ':' && getcmdline() ==# 'grep')  ? 'G
 cnoreabbrev <expr> lgrep (getcmdtype() ==# ':' && getcmdline() ==# 'lgrep') ? 'LGrep' : 'lgrep'
 
 augroup quickfix
-	autocmd!
-	autocmd QuickFixCmdPost cgetexpr cwindow
-	autocmd QuickFixCmdPost lgetexpr lwindow
+    autocmd!
+    autocmd QuickFixCmdPost cgetexpr cwindow
+    autocmd QuickFixCmdPost lgetexpr lwindow
 augroup END
 
 " Map ]q for next QuickFix error, [q for previous, ]Q for last, [Q for first, ]^Q for next file, [^Q for prev file
