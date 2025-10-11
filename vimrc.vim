@@ -474,7 +474,7 @@ if has("autocmd")
       \ | endif
 
     "From https://vim.fandom.com/wiki/Remove_unwanted_spaces
-    autocmd FileType c,cpp,java,php,vim autocmd BufWritePre <buffer> %s/\s\+$//e
+    "autocmd FileType c,cpp,java,php,vim autocmd BufWritePre <buffer> %s/\s\+$//e
 
     " Some people's C source uses hard tabs - ensure I do the same when editing those files
     function! CheckRealTabs()
