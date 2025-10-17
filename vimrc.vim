@@ -408,8 +408,9 @@ nnoremap ,cd :cd %:p:h<CR>:pwd<CR>  " ,cd to chdir to current file (prints dir a
 
 " Header files often live one folder up inside a 'h' dir
 set path+=../h
-command! Trimws execute '%s/\s*$//g'    " trim trailing whitespace - now done by default for C files
-                                        " See the "BufWritePre" autocmd below
+" Trim trailing whitespace
+command! Trimws execute '%s/\s*$//g'
+
 " I keep on pressing capital-W / capital-Q
 command! WQ wq
 command! Wq wq
